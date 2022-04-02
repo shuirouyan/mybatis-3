@@ -30,6 +30,9 @@ public final class LogFactory {
 
   private static Constructor<? extends Log> logConstructor;
 
+  /*
+    mybatis框架log日志优先级加载顺序
+   */
   static {
     tryImplementation(new Runnable() {
       @Override

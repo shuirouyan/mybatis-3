@@ -175,9 +175,11 @@ public class MapperMethod {
   public static class SqlCommand {
 
     private final String name;
+    // 六个值，分别为unknow\\insert\\select\\update\\delete\\flush
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+      // 完全类限定名（可以直接确定执行那一条sql语句的路径）
       String statementName = mapperInterface.getName() + "." + method.getName();
       MappedStatement ms = null;
       if (configuration.hasStatement(statementName)) {

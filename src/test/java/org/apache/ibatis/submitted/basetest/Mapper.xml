@@ -20,12 +20,29 @@
 
 <mapper namespace="org.apache.ibatis.submitted.basetest.Mapper">
 
+	<resultMap id="resultMap" type="org.apache.ibatis.submitted.basetest.User">
+		<id property="id" column="id"></id>
+		<result property="name" column="name"></result>
+		<association property="name" column="order_id" fetchType="eager">
+
+		</association>
+		<collection property="name" column="user_id" fetchType="lazy" ofType="org.apache.ibatis.submitted.basetest.User" resultMap="org.apache.ibatis.submitted.results_id.AnotherMapper.AnotherMap">
+
+		</collection>
+	</resultMap>
 	<select id="getUser" resultType="org.apache.ibatis.submitted.basetest.User">
 		select * from users where id = #{id}
+	</select>
+
+	<select id="getUser2" resultType="org.apache.ibatis.submitted.basetest.User">
+		select id,name
+		 from users where id = #{id}
 	</select>
 
 	<insert id="insertUser">
 		insert into users values(#{id}, #{name})
 	</insert>
+
+
 
 </mapper>
