@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<users>
+    <user id="1">
+        <name>张三</name>
+        <age>13</age>
+        <phone>13588889999</phone>
+        <createTime>2022-09-08 12:33:15</createTime>
+        <nickName>赵敏</nickName>
+    </user>
+    <user id="2">
+        <name><![CDATA[李斯<>]]></name>
+        <age>14</age>
+        <phone>13588887777</phone>
+        <createTime>2022-09-08 12:33:15</createTime>
+        <nickName>周芷若</nickName>
+    </user>
+</users>

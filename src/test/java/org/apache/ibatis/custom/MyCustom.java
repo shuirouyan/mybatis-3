@@ -1,12 +1,18 @@
 package org.apache.ibatis.custom;
 
+import com.alibaba.fastjson.JSON;
+import org.apache.ibatis.builder.xml.XMLConfigBuilder;
+import org.apache.ibatis.custom.domain.Person;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.Post;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.apache.ibatis.jdbc.SqlRunner;
+import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.parsing.XNode;
+import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
@@ -17,14 +23,29 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.submitted.results_id.AnotherMapper;
 import org.apache.ibatis.submitted.results_id.User;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author ck163
@@ -132,4 +153,137 @@ public class MyCustom {
 
     }
 
+    @Test
+    public void method07() {
+        Reader resourceAsReader;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+            SqlSessionFactory build = sqlSessionFactoryBuilder.build(resourceAsReader);
+            SqlSession sqlSession = build.openSession();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method08() {
+        Reader resourceAsReader;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            XMLConfigBuilder parser = new XMLConfigBuilder(resourceAsReader, null, null);
+            Configuration configuration = parser.getConfiguration();
+            System.out.printf("configuration = %s\n", configuration);
+            Configuration parse = parser.parse();
+            Class<? extends Log> logImpl = parse.getLogImpl();
+            System.out.println("logImpl = " + logImpl);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method09() {
+        try {
+            InputStream resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            XPathParser xPathParser = new XPathParser(resourceAsStream);
+            XNode xNode = xPathParser.evalNode("/configuration");
+            System.out.printf("xNode = %s\n", xNode);
+            XNode xNode1 = xNode.evalNode("settings");
+            System.out.printf("xNode1 = %s\n", xNode1);
+            String setting = xNode1.evalString("setting");
+            System.out.println("setting = " + setting);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method10() {
+        try {
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            InputStream inputStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config2.xml");
+            Document document = documentBuilder.parse(inputStream);
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            NodeList evaluate = (NodeList) xPath.evaluate("/users/*", document, XPathConstants.NODESET);
+            List<Person> peopleList = new ArrayList<>();
+            List<Person> peopleSyncList = Collections.synchronizedList(peopleList);
+            BlockingQueue<Person> peopleBlockingQueue = new ArrayBlockingQueue<Person>(2);
+            BlockingQueue<Person> linkedBlockingQueue = new LinkedBlockingQueue<>();
+            for (int i = 1; i < evaluate.getLength() + 1; i++) {
+                String path = "/users/user[" + i + "]";
+                String id = (String) xPath.evaluate(path + "/@id", document, XPathConstants.STRING);
+                System.out.println("id = " + id);
+                String name = (String) xPath.evaluate(path + "/name", document, XPathConstants.STRING);
+                String age = (String) xPath.evaluate(path + "/age", document, XPathConstants.STRING);
+                String phone = (String) xPath.evaluate(path + "/phone", document, XPathConstants.STRING);
+                String createTime = (String) xPath.evaluate(path + "/createTime", document, XPathConstants.STRING);
+                Date createTimeNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime);
+                String nickName = (String) xPath.evaluate(path + "/nickName", document, XPathConstants.STRING);
+                Person person = new Person(Long.valueOf(id), name, nickName, createTimeNow, Integer.valueOf(age), phone);
+                System.out.println("person = " + person);
+                // add put
+                // peopleBlockingQueue.offer(person,2, TimeUnit.SECONDS);
+                peopleSyncList.add(person);
+            }
+            // take remove
+            /*Person poll1 = peopleBlockingQueue.poll(2, TimeUnit.SECONDS);
+            System.out.println("poll1 = " + poll1);
+            Person poll2 = peopleBlockingQueue.poll(2, TimeUnit.SECONDS);
+            System.out.println("poll2 = " + poll2);*/
+            System.out.println("peopleSyncList = " + peopleSyncList);
+
+        } catch (ParserConfigurationException | IOException | SAXException | XPathExpressionException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method11() {
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config2.xml");
+            LinkedBlockingQueue<Person> peopleLinkedBlockingQueue = new LinkedBlockingQueue<>();
+            XPathParser xPathParser = new XPathParser(inputStream);
+            List<XNode> xNodeList = xPathParser.evalNodes("/users/*");
+            for (XNode xNode : xNodeList) {
+                Person person = new Person();
+                person.setId(xNode.getLongAttribute("id"));
+                List<XNode> children = xNode.getChildren();
+                for (XNode child : children) {
+                    if ("age".equals(child.getName())) {
+                        person.setAge(Integer.valueOf(child.getStringBody()));
+                    }
+                    if ("phone".equals(child.getName())) {
+                        person.setPhone(child.getStringBody("phone"));
+                    }
+                    if ("name".equals(child.getName())) {
+                        person.setName(child.getStringBody("name"));
+                    }
+                    if ("nickName".equals(child.getName())) {
+                        person.setNickName(child.getStringBody("nickName"));
+                    }
+                    if ("createTime".equals(child.getName())) {
+                        person.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(child.getStringBody("createTime")));
+                    }
+                }
+                peopleLinkedBlockingQueue.offer(person);
+            }
+            System.out.println("peopleLinkedBlockingQueue = " + peopleLinkedBlockingQueue);
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void method12() {
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(inputStream);
+            Configuration parse = xmlConfigBuilder.parse();
+            System.out.printf("configuration:%s\n", JSON.toJSON(parse.getDatabaseId()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
