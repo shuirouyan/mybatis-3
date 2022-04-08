@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.ibatis.custom.mapper.BookMapper">
+    <insert id="save" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into book
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        id,isbn,
+        <if test="bookName != null">
+            book_name,
+        </if>
+        <if test="bookTotal != null">
+            book_total,
+        </if>
+        <if test="bookDescription != null">
+            book_description,
+        </if>
+        <if test="createTime != null">
+            create_time,
+        </if>
+        <if test="updateTime != null">
+            update_time
+        </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <choose>
+                <when test="id != null">
+                    #{id},
+                </when>
+                <otherwise>
+                    null,
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="isbn != null">
+                    #{isbn},
+                </when>
+                <otherwise>
+                    substring(rand(),3,8),
+                </otherwise>
+            </choose>
+            <!--
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="id == null">
+                null,
+            </if>
+            <if test="isbn != null">
+                #{isbn},
+            </if>-->
+            <if test="bookName != null">
+                #{bookName},
+            </if>
+            <if test="bookTotal != null">
+                #{bookTotal},
+            </if>
+            <if test="bookDescription != null">
+                #{bookDescription},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+    <select id="findOne" resultType="Book">
+        select * from book
+        <where>
+            <choose>
+                <when test="id != null">
+                    id=#{id}
+                </when>
+                <otherwise>
+                    id=1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <resultMap id="bookList" type="Book">
+        <id column="id" property="id"/>
+        <result column="book_name" property="bookName"/>
+        <result column="book_total" property="bookTotal"/>
+        <result column="book_description" property="bookDescription"/>
+        <result column="isbn" property="isbn"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="findAllByIsbn" resultMap="bookList">
+        select * from book where isbn=#{isbn}
+    </select>
+</mapper>

@@ -1,8 +1,10 @@
 package org.apache.ibatis.custom;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
+import org.apache.ibatis.custom.domain.Book;
 import org.apache.ibatis.custom.domain.Person;
+import org.apache.ibatis.custom.mapper.BookMapper;
+import org.apache.ibatis.custom.mapper.PersonMapper;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.Post;
@@ -16,10 +18,8 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.session.*;
+import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.ibatis.submitted.results_id.AnotherMapper;
 import org.apache.ibatis.submitted.results_id.User;
 import org.junit.Test;
@@ -220,7 +220,7 @@ public class MyCustom {
                 String createTime = (String) xPath.evaluate(path + "/createTime", document, XPathConstants.STRING);
                 Date createTimeNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime);
                 String nickName = (String) xPath.evaluate(path + "/nickName", document, XPathConstants.STRING);
-                Person person = new Person(Long.valueOf(id), name, nickName, createTimeNow, Integer.valueOf(age), phone);
+                Person person = new Person(Integer.valueOf(id), name, nickName, createTimeNow, Integer.valueOf(age), phone, null);
                 System.out.println("person = " + person);
                 // add put
                 // peopleBlockingQueue.offer(person,2, TimeUnit.SECONDS);
@@ -247,7 +247,7 @@ public class MyCustom {
             List<XNode> xNodeList = xPathParser.evalNodes("/users/*");
             for (XNode xNode : xNodeList) {
                 Person person = new Person();
-                person.setId(xNode.getLongAttribute("id"));
+                person.setId(xNode.getIntAttribute("id"));
                 List<XNode> children = xNode.getChildren();
                 for (XNode child : children) {
                     if ("age".equals(child.getName())) {
@@ -279,11 +279,161 @@ public class MyCustom {
     public void method12() {
         try {
             InputStream inputStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
-            XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(inputStream);
+            /*XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(inputStream);
             Configuration parse = xmlConfigBuilder.parse();
-            System.out.printf("configuration:%s\n", JSON.toJSON(parse.getDatabaseId()));
+            Environment environment = parse.getEnvironment();
+            System.out.printf("configuration:%s\n", JSON.toJSON(parse.getEnvironment().getId()));
+            DataSource dataSource = environment.getDataSource();
+            Connection connection = dataSource.getConnection();*/
+            SqlSessionFactory build = new SqlSessionFactoryBuilder().build(inputStream);
+            SqlSession sqlSession = build.openSession();
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+//            Person byId = mapper.findById();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void method13() {
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory build = new SqlSessionFactoryBuilder().build(inputStream);
+            SqlSession sqlSession = build.openSession();
+            SqlSession sqlSession1 = build.openSession(true);
+            SqlSession sqlSession2 = build.openSession(TransactionIsolationLevel.REPEATABLE_READ);
+            SqlSession sqlSession3 = build.openSession(ExecutorType.REUSE);
+            SqlSession sqlSession4 = build.openSession(ExecutorType.REUSE, true);
+//            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+//            Person byId = mapper.findById(2);
+//            System.out.println("byId = " + byId);
+//            Person person = sqlSession.selectOne("org.apache.ibatis.custom.mapper.PersonMapper.findById",2);
+//            List<Person> person = sqlSession.selectList("org.apache.ibatis.custom.mapper.PersonMapper.findById", 2);
+//            System.out.println("person = " + person);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("id", 4);
+            map.put("name", "sqlSession insert");
+            map.put("nickName", "sqlSession nickName");
+            map.put("createTime", new Date());
+            map.put("age", 16);
+            map.put("phone", "17799998888");
+            int insertNum = sqlSession1.insert("org.apache.ibatis.custom.mapper.PersonMapper.save", map);
+            Integer id = (Integer) map.get("id");
+            System.out.println("id = " + id);
+            System.out.println("insertNum = " + insertNum);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method14() {
+        try {
+            InputStream resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+            Person person = mapper.findById(3);
+            System.out.println("person = " + person);
+            List<Book> isbnBooks = person.getIsbnBook();
+            String isbnBook = isbnBooks.get(0).getIsbn();
+            BookMapper bookMapper = sqlSession.getMapper(BookMapper.class);
+            int bookNum = bookMapper.save(null, isbnBook, "springmvc攻略", 653, "描述信息......", new Date(), null);
+            System.out.println("bookNum = " + bookNum);
+            sqlSession.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method15() {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            List<Object> list = sqlSession.selectList("org.apache.ibatis.custom.mapper.BookMapper.findAllByIsbn", "17162694");
+            System.out.println("list = " + list);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void method16() {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", 3);
+            List<Person> list = sqlSession.selectList("org.apache.ibatis.custom.mapper.PersonMapper.getPersonListById2");
+            list.forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method17() {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", 3);
+            List<Person> list = sqlSession.selectList("org.apache.ibatis.custom.mapper.PersonMapper.getPersonListById");
+            list.forEach(System.out::println);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method18() {
+        InputStream resourceAsStream = null;
+        try {
+            resourceAsStream = Resources.getResourceAsStream("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(resourceAsStream);
+            Configuration parse = xmlConfigBuilder.parse();
+            SqlSessionFactory sessionFactory = new DefaultSqlSessionFactory(parse);
+            SqlSession sqlSession = sessionFactory.openSession(true);
+            HashMap<String, Object> map = new HashMap<>(1);
+            map.put("isbn","56321438");
+            List<Object> list = sqlSession.selectList("org.apache.ibatis.custom.mapper.BookMapper.findAllByIsbn", map);
+            System.out.printf("%s\n", list);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void method19() {
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("xx.xx.xx");
+            new SqlSessionFactoryBuilder().build(resourceAsReader);
+            XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(resourceAsReader);
+            Configuration configuration = new Configuration();
+            configuration.setVariables(Resources.getResourceAsProperties(""));
+            // configuration.setEnvironment();
+            configuration.setDefaultExecutorType(ExecutorType.BATCH);
+            // configuration.setObjectFactory();
+
+            DefaultSqlSessionFactory defaultSqlSessionFactory = new DefaultSqlSessionFactory(configuration);
+            SqlSession defaultSqlSession = defaultSqlSessionFactory.openSession();
+            ScriptRunner scriptRunner = new ScriptRunner(defaultSqlSession.getConnection());
+            // scriptRunner.runScript();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

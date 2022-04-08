@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.apache.ibatis.custom.mapper.PersonMapper">
+    <select id="findById" resultType="Person">
+        select * from person where id=#{id}
+    </select>
+
+    <insert id="save" parameterType="Person" keyProperty="id" keyColumn="id">
+        insert into person(id,name, nick_name, create_time, age, phone) values
+        <trim prefix="(" suffix=")">
+            <choose>
+                <when test="id != null">
+                    #{id},
+                </when>
+                <otherwise>
+                    null,
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="name != null">
+                    #{name},
+                </when>
+                <otherwise>
+                    'default name',
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="nickName != null">
+                    #{nickName},
+                </when>
+                <otherwise>
+                    'defaul nickName',
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="createTime != null">
+                    #{createTime},
+                </when>
+                <otherwise>
+                    now(),
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="age != null">
+                    #{age},
+                </when>
+                <otherwise>
+                    0,
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="phone != null">
+                    #{phone}
+                </when>
+                <otherwise>
+                    '12266668888'
+                </otherwise>
+            </choose>
+        </trim>
+    </insert>
+
+    <resultMap id="personList" type="org.apache.ibatis.custom.domain.Person" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="age" column="age"/>
+        <result property="createTime" column="create_time"/>
+        <result property="phone" column="phone"/>
+        <association property="isbnBook" column="{isbn=isbn_book}" fetchType="lazy" javaType="list" select="org.apache.ibatis.custom.mapper.BookMapper.findAllByIsbn"/>
+    </resultMap>
+
+    <resultMap id="personListResultMap" type="org.apache.ibatis.custom.domain.Person" autoMapping="true">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="age" column="age"/>
+        <result property="createTime" column="create_time"/>
+        <result property="phone" column="phone"/>
+        <collection property="isbnBook" column="isbn_book" columnPrefix="book_" ofType="org.apache.ibatis.custom.domain.Book" javaType="list" fetchType="lazy">
+            <id column="id" property="id"/>
+            <result column="book_name" property="bookName"/>
+            <result column="book_total" property="bookTotal"/>
+            <result column="book_description" property="bookDescription"/>
+            <result column="isbn" property="isbn"/>
+            <result column="create_time" property="createTime"/>
+            <result column="update_time" property="updateTime"/>
+        </collection>
+    </resultMap>
+
+    <select id="getPersonListById" resultMap="personList" parameterType="integer">
+        select * from person
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+    </select>
+
+    <select id="getPersonListById2" resultMap="personListResultMap" parameterType="int">
+        select
+        p.id id,p.name name, p.nick_name nickName, p.age age, p.create_time createTime, p.phone phone,
+        b.id as 'book_id', b.book_name as 'book_book_name', b.book_total 'book_book_total', b.book_description 'book_book_description',
+        b.isbn 'book_isbn', b.create_time 'book_create_time', b.update_time 'book_update_time'
+        from person p left join book b on p.isbn_book=b.isbn
+        <where>
+            <if test="id != null">
+                p.id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>

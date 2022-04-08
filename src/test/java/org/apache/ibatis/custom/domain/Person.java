@@ -1,36 +1,42 @@
 package org.apache.ibatis.custom.domain;
 
+import org.apache.ibatis.type.Alias;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ck163
  * @date 2022-04-06 13:45:50
  */
+@Alias("person")
 public class Person {
-    private Long id;
+    private Integer id;
     private String name;
     private String nickName;
     private Date createTime;
     private Integer age;
     private String phone;
+    private List<Book> isbnBook;
 
     public Person() {
     }
 
-    public Person(Long id, String name, String nickName, Date createTime, Integer age, String phone) {
+    public Person(Integer id, String name, String nickName, Date createTime, Integer age, String phone, List<Book> isbnBook) {
         this.id = id;
         this.name = name;
         this.nickName = nickName;
         this.createTime = createTime;
         this.age = age;
         this.phone = phone;
+        this.isbnBook = isbnBook;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -74,6 +80,14 @@ public class Person {
         this.phone = phone;
     }
 
+    public List<Book> getIsbnBook() {
+        return isbnBook;
+    }
+
+    public void setIsbnBook(List<Book> isbnBook) {
+        this.isbnBook = isbnBook;
+    }
+
     @Override
     public String toString() {
         return "Person{" +
@@ -82,7 +96,8 @@ public class Person {
                 ", nickName='" + nickName + '\'' +
                 ", createTime=" + createTime +
                 ", age=" + age +
-                ", phone=" + phone +
+                ", phone='" + phone + '\'' +
+                ", isbnBook=" + isbnBook +
                 '}';
     }
 }
