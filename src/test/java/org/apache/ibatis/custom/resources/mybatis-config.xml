@@ -33,6 +33,20 @@
         <typeAlias type="org.apache.ibatis.custom.domain.Book" alias="Book"/>
     </typeAliases>
 
+    <!--<typeHandlers>
+        &lt;!&ndash;<package name="xxx.xxx"/>&ndash;&gt;
+        <typeHandler handler="xx.xx.xx" javaType="int" jdbcType="int"/>
+    </typeHandlers>-->
+
+    <!--<plugins>
+        <plugin interceptor="">
+            <property name="value" value="23"/>
+        </plugin>
+        <plugin interceptor="">
+            <property name="value2" value="56"/>
+        </plugin>
+    </plugins>-->
+
     <environments default="development">
         <environment id="development">
             <transactionManager type="JDBC">
@@ -64,7 +78,15 @@
                 <property name="password" value=""/>
             </dataSource>
         </environment>
+
     </environments>
+
+    <!--<databaseIdProvider type="DB_VENDOR">
+        <property name="SQL Server" value="sqlserver"/>
+        <property name="DB2" value="db2"/>
+        <property name="Oracle" value="oracle" />
+        <property name="MySQL" value="mysql" />
+    </databaseIdProvider>-->
 
     <mappers>
         <mapper resource="org/apache/ibatis/custom/resources/mapper/PersonMapper.xml"/>

@@ -16,10 +16,17 @@ public interface BookMapper {
      *
      * @return book
      */
-    Book findOne(Integer id);
+    Book findOne(@Param("param") Integer id);
 
     int save(@Param("id") Integer id, @Param("isbn") String isbn, @Param("bookName") String bookName, @Param("bookTotal") Integer bookTotal,
              @Param("bookDescription") String bookDescription, @Param("createTime") Date createTime, @Param("updateTime") Date updateTime);
 
-    List<Book> findAllByIsbn(String isbn);
+    List<Book> findAllByIsbn(@Param("isbn") String isbn);
+
+    /**
+     * 数据库时间
+     *
+     * @return datetime
+     */
+    String getDataBaseTime();
 }

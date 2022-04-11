@@ -67,8 +67,9 @@
             </if>
         </trim>
     </insert>
-    <select id="findOne" resultType="Book">
+    <select id="findOne" resultMap="bookList">
         select * from book
+        <!--
         <where>
             <choose>
                 <when test="id != null">
@@ -78,7 +79,14 @@
                     id=1
                 </otherwise>
             </choose>
-        </where>
+        </where>-->
+        where 1=1
+        <if test="param != null">
+            and id=#{param}
+        </if>
+        <if test="param == null">
+            and id=1
+        </if>
     </select>
 
     <resultMap id="bookList" type="Book">
@@ -94,4 +102,9 @@
     <select id="findAllByIsbn" resultMap="bookList">
         select * from book where isbn=#{isbn}
     </select>
+
+    <select id="getDataBaseTime" resultType="string">
+        select now() from dual
+    </select>
+
 </mapper>

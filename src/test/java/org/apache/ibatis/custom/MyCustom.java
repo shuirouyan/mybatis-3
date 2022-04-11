@@ -1,10 +1,12 @@
 package org.apache.ibatis.custom;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.custom.domain.Book;
 import org.apache.ibatis.custom.domain.Person;
 import org.apache.ibatis.custom.mapper.BookMapper;
 import org.apache.ibatis.custom.mapper.PersonMapper;
+import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Blog;
 import org.apache.ibatis.domain.blog.Post;
@@ -405,7 +407,7 @@ public class MyCustom {
             SqlSessionFactory sessionFactory = new DefaultSqlSessionFactory(parse);
             SqlSession sqlSession = sessionFactory.openSession(true);
             HashMap<String, Object> map = new HashMap<>(1);
-            map.put("isbn","56321438");
+            map.put("isbn", "56321438");
             List<Object> list = sqlSession.selectList("org.apache.ibatis.custom.mapper.BookMapper.findAllByIsbn", map);
             System.out.printf("%s\n", list);
         } catch (IOException e) {
@@ -418,9 +420,12 @@ public class MyCustom {
     public void method19() {
         Reader resourceAsReader = null;
         try {
-            resourceAsReader = Resources.getResourceAsReader("xx.xx.xx");
-            new SqlSessionFactoryBuilder().build(resourceAsReader);
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
             XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(resourceAsReader);
+            Configuration parse = xmlConfigBuilder.parse();
+            Environment environment = parse.getEnvironment();
+
             Configuration configuration = new Configuration();
             configuration.setVariables(Resources.getResourceAsProperties(""));
             // configuration.setEnvironment();
@@ -429,6 +434,11 @@ public class MyCustom {
 
             DefaultSqlSessionFactory defaultSqlSessionFactory = new DefaultSqlSessionFactory(configuration);
             SqlSession defaultSqlSession = defaultSqlSessionFactory.openSession();
+            Properties properties = Resources.getResourceAsProperties("org/apache/ibatis/custom/resources/jdbc.properties");
+            UnpooledDataSource unpooledDataSource = new UnpooledDataSource(properties.getProperty("driver"), properties.getProperty("url"),
+                    properties.getProperty("username"), properties.getProperty("password"));
+
+
             ScriptRunner scriptRunner = new ScriptRunner(defaultSqlSession.getConnection());
             // scriptRunner.runScript();
         } catch (IOException e) {
@@ -436,4 +446,63 @@ public class MyCustom {
         }
 
     }
+
+    @Test
+    public void method20() {
+        Properties properties = null;
+        try {
+            properties = Resources.getResourceAsProperties("org/apache/ibatis/custom/resources/jdbc.properties");
+            if (properties != null) {
+                String driver = properties.getProperty("db.driver");
+                String url = properties.getProperty("db.url");
+                String username = properties.getProperty("db.username");
+                String password = properties.getProperty("db.password");
+                System.out.printf("%s\t%s\t%s\t%s\n", driver, url, username, password);
+                UnpooledDataSource unpooledDataSource = new UnpooledDataSource(driver, url, username, password);
+                Connection connection = unpooledDataSource.getConnection();
+                SqlRunner sqlRunner = new SqlRunner(connection);
+                List<Map<String, Object>> list = sqlRunner.selectAll("select * from person");
+                list.forEach(System.out::println);
+            } else {
+                System.out.printf("%s\n", "properties is null.");
+            }
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void method21() {
+
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            BookMapper mapper = sqlSession.getMapper(BookMapper.class);
+            Book book = mapper.findOne(2);
+            System.out.printf("%s\n", JSON.toJSON(book));
+            List<Book> allByIsbn = mapper.findAllByIsbn("56321438");
+            System.out.printf("%s\n", allByIsbn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method22() {
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            BookMapper mapper = sqlSession.getMapper(BookMapper.class);
+            String dataBaseTime = mapper.getDataBaseTime();
+            System.out.printf("%s\n", dataBaseTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
