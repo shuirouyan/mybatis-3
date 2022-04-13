@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -499,10 +501,56 @@ public class MyCustom {
             SqlSession sqlSession = sqlSessionFactory.openSession(true);
             BookMapper mapper = sqlSession.getMapper(BookMapper.class);
             String dataBaseTime = mapper.getDataBaseTime();
-            System.out.printf("%s\n", dataBaseTime);
+            System.out.printf("第一次：%s\n", dataBaseTime);
+            /*
+                <setting name="localCacheScope" value="SESSION"/>
+                如果该参数设置的值为Session，那么该mapper会走缓存，不会查询数据库
+                如果该参数设置为STATEMENT，那么该mapper不会走缓存，会去数据库中查询一遍
+             */
+            String dataBaseTime2 = mapper.getDataBaseTime();
+            System.out.printf("第二次：%s\n", dataBaseTime2);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void method23() {
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            Connection connection = sqlSession.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("update v_name set name='update4' where id=4");
+            boolean execute = preparedStatement.execute();
+            System.out.printf("%s\n", execute);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method24() {
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            Connection sessionConnection = sqlSession.getConnection();
+            DataSource dataSource = sqlSession.getConfiguration().getEnvironment().getDataSource();
+            Connection connection = dataSource.getConnection();
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+            int updateName = mapper.updateOnePerson("update name", 1);
+            System.out.printf("%s\n", updateName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void method25() throws InterruptedException {
+
     }
 
 }

@@ -216,7 +216,7 @@ public abstract class BaseExecutor implements Executor {
     }
     if (configuration.getEnvironment() != null) {
       // issue #176
-      cacheKey.update(configuration.getEnvironment().getId());
+      cacheKey.update(configuration.getEnvironment().getId()); // environment标签中的id=""
     }
     return cacheKey;
   }    

@@ -47,4 +47,13 @@ public interface PersonMapper {
      * @return list
      */
     List<Person> getPersonListById2(@Param("id") Integer id);
+
+    /**
+     * param
+     *
+     * @param param param
+     * @param id    id
+     * @return num
+     */
+    int updateOnePerson(@Param("param") String param, @Param("id") Integer id);
 }

@@ -26,6 +26,8 @@
     <settings>
         <setting name="logImpl" value="LOG4J"/>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- default value SESSION STATEMENT为更细粒度的缓存查询，方法调用完成之后就清空localCache(一级缓存)缓存 -->
+        <!--<setting name="localCacheScope" value="SESSION"/>-->
     </settings>
 
     <typeAliases>

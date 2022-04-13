@@ -15,12 +15,12 @@
  */
 package org.apache.ibatis.binding;
 
+import org.apache.ibatis.session.SqlSession;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.ibatis.session.SqlSession;
 
 /**
  * @author Lasse Voss
@@ -44,6 +44,10 @@ public class MapperProxyFactory<T> {
 
   @SuppressWarnings("unchecked")
   protected T newInstance(MapperProxy<T> mapperProxy) {
+    // jdk 动态代理 javaassit
+    // mapperInterface.getClassLoader() 类加载器
+    // mapperInterface mapper接口文件
+    // mapperProxy 被代理类
     return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
   }
 
