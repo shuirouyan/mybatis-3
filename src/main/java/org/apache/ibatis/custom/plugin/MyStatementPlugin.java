@@ -1,4 +1,4 @@
-package org.apache.ibatis.custom;
+package org.apache.ibatis.custom.plugin;
 
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.plugin.*;
@@ -23,7 +23,7 @@ public class MyStatementPlugin implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        System.out.printf("org.apache.ibatis.custom.MyStatementPlugin plugin load....");
+        System.out.printf("org.apache.ibatis.custom.plugin.MyStatementPlugin plugin load....");
         // pre process
         if (invocation.getTarget() instanceof StatementHandler) {
             Method method = invocation.getMethod();

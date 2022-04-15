@@ -1,4 +1,4 @@
-package org.apache.ibatis.custom.mapper;
+package org.apache.ibatis.custom.mappers;
 
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.custom.domain.Book;
@@ -24,10 +24,9 @@ public interface BookMapper {
     List<Book> findAllByIsbn(@Param("isbn") String isbn);
 
     /**
-     *
      * @return
      */
-    List<Book> findListByIdAndIsbn(Book book);
+    List<Book> findListByIdAndIsbn(@Param("bookTotal") Integer bookTotal, @Param("isbn") String isbn);
 
     /**
      * 数据库时间

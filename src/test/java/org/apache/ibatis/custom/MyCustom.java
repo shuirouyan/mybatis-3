@@ -556,7 +556,10 @@ public class MyCustom {
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
             SqlSession sqlSession = sqlSessionFactory.openSession(true);
             BookMapper mapper = sqlSession.getMapper(BookMapper.class);
-            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(349, "17162694");
+            Book book = new Book();
+            book.setBookTotal(349);
+            book.setIsbn("17162694");
+            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(book);
             System.out.printf("%s\n", listByIdAndIsbn);
         } catch (IOException e) {
             e.printStackTrace();

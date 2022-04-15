@@ -1,18 +1,11 @@
-package org.apache.ibatis.custom;
+package org.apache.ibatis.custom.plugin;
 
 import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMap;
-import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -29,6 +22,16 @@ public class MyPlugin implements Interceptor {
 
     @Override
     public Object plugin(Object target) {
+        System.out.printf("%s\n", target);
+        /*if (target instanceof ParameterHandler) {
+            return target;
+        }
+        if (target instanceof ResultSetHandler) {
+            return target;
+        }
+        if (target instanceof StatementHandler) {
+            return target;
+        }*/
         return Plugin.wrap(target, this);
     }
 
@@ -36,29 +39,33 @@ public class MyPlugin implements Interceptor {
     public Object intercept(Invocation invocation) throws Throwable {
         // implement pre-processing if needed
         String name = invocation.getMethod().getName();
-        Method method = invocation.getMethod();
-        System.out.printf("method.getClass() %s\n", method.getClass());
-        Object[] args = invocation.getArgs();
         Object target = invocation.getTarget();
+        Object[] args = invocation.getArgs();
         if (target instanceof Executor) {
             Object arg = args[0];
-            Map<String,Object> arg1 = (Map<String, Object>) args[1];
-            if (arg instanceof MappedStatement) {
+
+            /*if (arg instanceof MappedStatement) {
                 MappedStatement mappedStatement = (MappedStatement) arg;
                 BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql(Object.class);
                 String sql = boundSql.getSql();
                 System.out.printf("source sql ====> %s\n", sql);
-                List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-                ParameterMap parameterMap = mappedStatement.getParameterMap();
-                for (ParameterMapping parameterMapping : parameterMappings) {
-                    String property = parameterMapping.getProperty();
-                    System.out.printf("%-11s ===> %s\n", property, arg1.get(property));
-
+                if (args.length > 1 && args[1] instanceof Map) {
+                    Map arg1 = (Map) args[1];
+                    for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
+                        String property = parameterMapping.getProperty();
+                        System.out.printf("%-11s ===> %s\n", property, arg1.get(property));
+                    }
+                    System.out.println();
                 }
-                System.out.println();
-            }
+
+            }*/
         }
-        Parameter[] parameters = method.getParameters();
+        /*Method method = invocation.getMethod();
+        System.out.printf("method.getClass() %s\n", method.getClass());
+        Object[] args = invocation.getArgs();
+        Object target = invocation.getTarget();
+
+        Parameter[] parameters = method.getParameters();*/
         /*System.out.println("method.getName() = " + method.getName());
         System.out.printf("args %s\n", Arrays.toString(args));
         System.out.println("target = " + target);
