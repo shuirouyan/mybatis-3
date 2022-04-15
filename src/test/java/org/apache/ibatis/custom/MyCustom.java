@@ -550,7 +550,17 @@ public class MyCustom {
 
     @Test
     public void method25() throws InterruptedException {
-
+        Reader resourceAsReader = null;
+        try {
+            resourceAsReader = Resources.getResourceAsReader("org/apache/ibatis/custom/resources/mybatis-config.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsReader);
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
+            BookMapper mapper = sqlSession.getMapper(BookMapper.class);
+            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(349, "17162694");
+            System.out.printf("%s\n", listByIdAndIsbn);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

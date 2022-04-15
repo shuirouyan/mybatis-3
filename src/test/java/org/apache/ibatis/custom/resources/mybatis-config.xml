@@ -24,7 +24,7 @@
 
     </properties>
     <settings>
-        <setting name="logImpl" value="LOG4J"/>
+        <setting name="logImpl" value="NO_LOGGING"/>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
         <!-- default value SESSION STATEMENT为更细粒度的缓存查询，方法调用完成之后就清空localCache(一级缓存)缓存 -->
         <!--<setting name="localCacheScope" value="SESSION"/>-->
@@ -40,14 +40,18 @@
         <typeHandler handler="xx.xx.xx" javaType="int" jdbcType="int"/>
     </typeHandlers>-->
 
-    <!--<plugins>
-        <plugin interceptor="">
-            <property name="value" value="23"/>
+    <plugins>
+        <plugin interceptor="org.apache.ibatis.custom.MyPlugin">
+            <property name="name1" value="23"/>
+            <property name="name2" value="24"/>
+            <property name="name3" value="25"/>
+            <property name="name4" value="26"/>
         </plugin>
-        <plugin interceptor="">
-            <property name="value2" value="56"/>
+        <plugin interceptor="org.apache.ibatis.custom.MyStatementPlugin">
+            <property name="name1" value="23"/>
+            <property name="name2" value="24"/>
         </plugin>
-    </plugins>-->
+    </plugins>
 
     <environments default="development">
         <environment id="development">

@@ -88,6 +88,11 @@ public class Person {
         this.isbnBook = isbnBook;
     }
 
+
+    public static Person newInstanceMethod() {
+        return new Person();
+    }
+
     @Override
     public String toString() {
         return "Person{" +
