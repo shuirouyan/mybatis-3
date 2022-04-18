@@ -112,15 +112,20 @@
     </sql>
 
     <select id="findListByIdAndIsbn" resultMap="bookList">
+
         select
         <include refid="Base_Column"/>
         from book
         <where>
             <if test="bookTotal != null">
-              or book_total = ${bookTotal}
+              and book_total = #{bookTotal}
+            </if>
+            <if test="bookName != null">
+                <bind name="bookName" value="'%'+ _parameter.bookName +'%'"/>
+              and book_name like #{bookName}
             </if>
             <if test="isbn != null">
-              or isbn = ${isbn}
+              and isbn = #{isbn}
             </if>
         </where>
 

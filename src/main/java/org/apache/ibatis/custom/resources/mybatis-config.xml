@@ -45,11 +45,11 @@
             <property name="name2" value="24"/>
             <property name="name3" value="25"/>
             <property name="name4" value="26"/>
-        </plugin>
+        </plugin><!--
         <plugin interceptor="org.apache.ibatis.custom.plugin.MyStatementPlugin">
             <property name="name1" value="23"/>
             <property name="name2" value="24"/>
-        </plugin>
+        </plugin>-->
     </plugins>
 
     <environments default="development">

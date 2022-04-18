@@ -24,9 +24,12 @@ public interface BookMapper {
     List<Book> findAllByIsbn(@Param("isbn") String isbn);
 
     /**
-     * @return
+     * @param bookTotal bookTotal
+     * @param isbn      isbn
+     * @param bookName  bookName
+     * @return list
      */
-    List<Book> findListByIdAndIsbn(@Param("bookTotal") Integer bookTotal, @Param("isbn") String isbn);
+    List<Book> findListByIdAndIsbn(@Param("bookTotal") Integer bookTotal, @Param("isbn") String isbn, @Param("bookName") String bookName);
 
     /**
      * 数据库时间

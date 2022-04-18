@@ -24,9 +24,9 @@ public class SqlNodeTest {
             SqlSession sqlSession = sqlSessionFactory.openSession(true);
             BookMapper mapper = sqlSession.getMapper(BookMapper.class);
             Book book = new Book();
-            book.setBookTotal(349);
+            book.setBookTotal(653);
             book.setIsbn("56321438");
-            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(book.getBookTotal(), book.getIsbn());
+            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(book.getBookTotal(), book.getIsbn(), "mvc");
             System.out.printf("%s\n", listByIdAndIsbn);
         } catch (IOException e) {
             e.printStackTrace();
