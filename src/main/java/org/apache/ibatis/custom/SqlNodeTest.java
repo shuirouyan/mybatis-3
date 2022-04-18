@@ -9,7 +9,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 
 /**
  * @author ck163
@@ -26,8 +25,10 @@ public class SqlNodeTest {
             Book book = new Book();
             book.setBookTotal(653);
             book.setIsbn("56321438");
-            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(book.getBookTotal(), book.getIsbn(), "mvc");
-            System.out.printf("%s\n", listByIdAndIsbn);
+//            List<Book> listByIdAndIsbn = mapper.findListByIdAndIsbn(book.getBookTotal(), book.getIsbn(), "mvc");
+//            System.out.printf("%s\n", listByIdAndIsbn);
+            String dataBaseTime = mapper.getDataBaseTime();
+            System.out.println("dataBaseTime = " + dataBaseTime);
         } catch (IOException e) {
             e.printStackTrace();
         }

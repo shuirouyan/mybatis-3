@@ -24,6 +24,10 @@ public class MyPlugin implements Interceptor {
 
     private Properties properties;
 
+    /**
+     * @param target executor的实例
+     * @return object
+     */
     @Override
     public Object plugin(Object target) {
         return Plugin.wrap(target, this);
@@ -38,8 +42,10 @@ public class MyPlugin implements Interceptor {
         if (target instanceof Executor) {
             Object arg = args[0];
             Object param = args[1];
+            Object limitParameter = args[2];
             if (arg instanceof MappedStatement) {
                 MappedStatement mappedStatement = (MappedStatement) arg;
+                //mappedStatement.getBoundSql()
                 SqlSource sqlSource = mappedStatement.getSqlSource();
                 BoundSql boundSql = sqlSource.getBoundSql(param);
                 if (boundSql != null) {
@@ -54,8 +60,6 @@ public class MyPlugin implements Interceptor {
                         System.out.println();
                     }
                 }
-
-
             }
         }
         /*Method method = invocation.getMethod();
