@@ -9,6 +9,7 @@ import org.apache.ibatis.session.ResultHandler;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,6 +50,7 @@ public class MyStatementPlugin implements Interceptor {
             System.out.printf("parameters %s\n", Arrays.toString(parameters));
         }*/
         Method method = invocation.getMethod();
+        String sql = "";
         if ("query".equalsIgnoreCase(method.getName())) {
             System.out.printf("query......\n");
             Object target = invocation.getTarget();
@@ -59,7 +61,8 @@ public class MyStatementPlugin implements Interceptor {
             if (target instanceof RoutingStatementHandler) {
                 RoutingStatementHandler routingStatementHandler = (RoutingStatementHandler) target;
                 BoundSql boundSql = routingStatementHandler.getBoundSql();
-                String sql = boundSql.getSql();
+
+                sql = boundSql.getSql();
                 Object parameterObject = boundSql.getParameterObject();
 //                System.out.printf("sql:%s\nparameterObject:%s\n", sql, parameterObject);
                 System.out.printf("%-10s====> %s\n", "sql statment", sql);
@@ -85,21 +88,44 @@ public class MyStatementPlugin implements Interceptor {
 //            System.out.printf("args %s\n", Arrays.toString(args));
         } else if ("batch".equalsIgnoreCase(method.getName())) {
             System.out.printf("batch......\n");
+            Object[] args = invocation.getArgs();
+            if (args.length >= 1) {
+                Statement statement = (Statement) args[0];
+            }
         } else if ("update".equalsIgnoreCase(method.getName())) {
-            System.out.printf("update......\n");
+            System.out.printf("update....update..\n");
+            Object target = invocation.getTarget();
+            Object[] args = invocation.getArgs();
+            System.out.println("target = " + target);
+            System.out.printf("args %s\n", Arrays.toString(args));
         } else if ("prepare".equalsIgnoreCase(method.getName())) {
-            System.out.printf("update......\n");
+            System.out.printf("prepare......\n");
             Object target = invocation.getTarget();
             System.out.println("target = " + target);
             Object[] args = invocation.getArgs();
-            Object arg = args[0];
-            if (arg instanceof Connection) {
-                Connection connection = (Connection) arg;
-//                connection.prepareStatement();
+            if (target instanceof StatementHandler) {
+                StatementHandler statementHandler = (StatementHandler) target;
+                sql = statementHandler.getBoundSql().getSql();
             }
         }
         // after process
-        return invocation.proceed();
+        Object proceed = null;
+        long startTimeMillis = 0;
+        try {
+            startTimeMillis = System.currentTimeMillis();
+            proceed = invocation.proceed();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            long endTimeMillis = System.currentTimeMillis();
+            Long queryTime = Long.valueOf(properties.getProperty("queryTime", "3"));
+            Long pauseTime = Math.max(queryTime, 0);
+            long time = endTimeMillis - startTimeMillis;
+            if (time > pauseTime * 1000) {
+                System.out.printf("慢sql记录：%s\n耗时[%s]毫秒\n", sql, time);
+            }
+        }
+        return proceed;
     }
 
     @Override

@@ -51,7 +51,7 @@
             <property name="name2" value="24"/>
         </plugin>-->
         <plugin interceptor="org.apache.ibatis.custom.plugin.MyStatementPlugin">
-            <property name="queryTime" value="23"/>
+            <property name="queryTime" value="0"/>
         </plugin>
     </plugins>
 
